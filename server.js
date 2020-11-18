@@ -4,6 +4,7 @@ import cors from "cors";
 import Pusher from "pusher";
 import dotenv from "dotenv";
 import Slack from "./models/Slack.js";
+import path from "path";
 // app config
 const app = express();
 dotenv.config();
@@ -112,6 +113,15 @@ app.get("/get/conversation", (req, res) => {
     }
   });
 });
+
+// serve static assets on production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  });
+}
 
 // listen
 app.listen(port, () => console.log(`server listening on port ${port}`));
