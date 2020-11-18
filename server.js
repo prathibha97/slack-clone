@@ -54,7 +54,6 @@ mongoose
   .catch((err) => console.log(err.message));
 
 // api routes
-app.get("/", (req, res) => res.status(200).send("hello world"));
 
 app.post("/new/channel", (req, res) => {
   const dbData = req.body;
