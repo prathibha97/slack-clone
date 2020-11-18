@@ -1,12 +1,21 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import pusher from "pusher";
+import Pusher from "pusher";
 import dotenv from "dotenv";
 import Slack from "./models/Slack.js";
 // app config
 const app = express();
 dotenv.config();
+
+const pusher = new Pusher({
+  appId: "1108968",
+  key: process.env.KEY,
+  secret: process.env.SECRET,
+  cluster: "ap2",
+  useTLS: true,
+});
+
 const port = process.env.PORT || 9000;
 
 // middleware
@@ -22,6 +31,23 @@ mongoose
   })
   .then(() => {
     console.log(`mongoDB connected`);
+    const changeStream = mongoose.connection
+      .collection("conversations")
+      .watch();
+
+    changeStream.on("change", (change) => {
+      if (change.operationType === "insert") {
+        pusher.trigger("channels", "newChannel", {
+          change: change,
+        });
+      } else if (change.operationType === "update") {
+        pusher.trigger("conversation", "newMessage", {
+          change: change,
+        });
+      } else {
+        console.log(`error triggering pusher`);
+      }
+    });
   })
 
   .catch((err) => console.log(err.message));

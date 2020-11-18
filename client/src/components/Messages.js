@@ -8,7 +8,7 @@ function Messages({ message, timestamp, user, userImage }) {
       <div className='messages__info'>
         <h4>
           {user}
-          <span className='messages__timestamp'>{new Date(timestamp?.toDate()).toUTCString()}</span>
+          <span className='messages__timestamp'>{new Date(parseInt(timestamp)).toUTCString()}</span>
         </h4>
         <p>{message}</p>
       </div>

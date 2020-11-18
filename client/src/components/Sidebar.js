@@ -17,21 +17,30 @@ import "../css/Sidebar.css";
 import SidebarOption from "./SidebarOption";
 import db from "../firebase";
 import { useStateValue } from "../context/StateProvider";
+import axios from '../axios'
+import Pusher from 'pusher-js'
+
+const pusher = new Pusher('715d7e3f66d25a5cc259', {
+  cluster: 'ap2'
+});
 
 function Sidebar() {
   const [channels, setChannels] = useState([]);
   const [{ user }] = useStateValue();
 
+  const getChannelList = () => {
+    axios.get('/get/channelList')
+      .then((res) => setChannels(res.data))
+  }
+
   useEffect(() => {
-    // run this code when the sidebar component loads
-    db.collection("rooms").onSnapshot((snapshot) =>
-      setChannels(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          name: doc.data().name,
-        })),
-      ),
-    );
+   getChannelList()
+
+  //  pusher stuff
+  const channel = pusher.subscribe('channels');
+      channel.bind('newChannel', function (data) {
+        getChannelList()
+      });
   }, []);
   return (
     <div className='sidebar'>
